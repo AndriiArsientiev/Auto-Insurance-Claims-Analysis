@@ -4,9 +4,9 @@ SQL project | Analysis of auto insurance claims
 
 ## Table of Contents
 
-- Business Task
-- Relationship Diagram
-- Questions and Solutions
+- [Business Task](#business-task)
+- [Relationship Diagram](#relationship-diagram)
+- [Questions and Solutions](#questions-and-solutions)
 
 ## Business Task
 
@@ -17,10 +17,35 @@ The analysis explores whether the losses come from specific segments (states, co
 The goal is to find the customers costing the company money, understand what makes them different, and produce a concrete action plan.
 
 ## Relationship Diagram
+**Table 1: insurance_claims (raw import)**
 
-#Table 1 here
+| Customer | State | Monthly Premium Auto | Total Claim Amount |
+|---|---|---|---|
+| QC35222 | California | 93 | 380.9 |
+| AE98193 | Washington | 153 | 1098.36 |
+| TM23514 | Oregon | 178 | 783.64 |
+| WB38524 | California | 100 | 479.52 |
+| QZ42725 | Washington | 86 | 622.08 |
 
-#Table 2 here
+**Table 2: claims_clean (types fixed)**
+
+| customer | state | coverage | monthly_premium | months_since_last_claim | months_since_inception | open_complaints | total_claim_amount |
+|---|---|---|---|---|---|---|---|
+| QC35222 | California | Basic | 93.0 | 4 | 107 | 3 | 380.9 |
+| AE98193 | Washington | Basic | 153.0 | 26 | 14 | 0 | 1098.36 |
+| TM23514 | Oregon | Extended | 178.0 | 11 | 38 | 0 | 783.64 |
+| WB38524 | California | Basic | 100.0 | 36 | 38 | 0 | 479.52 |
+| QZ42725 | Washington | Basic | 86.0 | 16 | 32 | 0 | 622.08 |
+
+**Table 3: customer_financials (working table)**
+
+| customer | state | monthly_premium | months_since_inception | total_premium_paid | total_claim_amount | net_position | loss_ratio |
+|---|---|---|---|---|---|---|---|
+| QC35222 | California | 93.0 | 107 | 9951.0 | 380.9 | -9570.1 | 0.04 |
+| AE98193 | Washington | 153.0 | 14 | 2142.0 | 1098.36 | -1043.64 | 0.51 |
+| TM23514 | Oregon | 178.0 | 38 | 6764.0 | 783.64 | -5980.36 | 0.12 |
+| WB38524 | California | 100.0 | 38 | 3800.0 | 479.52 | -3320.48 | 0.13 |
+| QZ42725 | Washington | 86.0 | 32 | 2752.0 | 622.08 | -2129.92 | 0.23 |
 
 ## Questions and Solutions
 
@@ -52,8 +77,8 @@ FROM insurance_claims
 UNION ALL
 SELECT 'Renew Offer Type - Unique', COUNT(DISTINCT "Renew Offer Type")
 FROM insurance_claims;
-
 ```
+
 <img width="268" height="228" alt="image" src="https://github.com/user-attachments/assets/ed99676f-cc15-432a-ba00-35f60c32b541" />
 
 **2. Create a cleaned table**
@@ -124,6 +149,7 @@ SELECT 'CLV - Min', MIN(clv) FROM claims_clean
 UNION ALL
 SELECT 'CLV - Max', MAX(clv) FROM claims_clean;
 ```
+
 <img width="240" height="306" alt="image" src="https://github.com/user-attachments/assets/91bf5148-2fcf-44e6-be8a-3358eb76fb13" />
 
 No missing values in premium, claims, or lifetime value. No negative or zero premiums, no negative claims. Premium and claim ranges look reasonable.
@@ -160,6 +186,7 @@ SELECT 'Income - Max', MAX(income) FROM claims_clean
 UNION ALL
 SELECT 'Income - Null %', ROUND(100.0 * (COUNT(*) - COUNT(income)) / COUNT(*), 2) FROM claims_clean;
 ```
+
 <img width="257" height="385" alt="image" src="https://github.com/user-attachments/assets/2f7c74cf-462f-4c0b-991b-d3ad41130c42" />
 
 **5. Any logical violations in the data?**
@@ -179,9 +206,10 @@ SELECT 'More than 9 policies', COUNT(*) FROM claims_clean WHERE num_policies > 9
 UNION ALL
 SELECT 'More than 5 open complaints', COUNT(*) FROM claims_clean WHERE open_complaints > 5;
 ```
+
 <img width="336" height="178" alt="image" src="https://github.com/user-attachments/assets/c3abc31a-265e-4f06-9c04-16fd548941ec" />
 
-A group of customers have their last claim dated before their current policy started which represent history with a previous insurer.
+A group of customers have their last claim dated before their current policy started, which represents history with a previous insurer.
 
 **6. How many customers have zero income?**
 
@@ -191,8 +219,8 @@ SELECT COUNT(*) AS income_zero_count,
 FROM claims_clean
 WHERE income = 0;
 ```
-<img width="213" height="48" alt="image" src="https://github.com/user-attachments/assets/8e6e9b63-865d-4a44-9a94-f997ac607942" />
 
+<img width="213" height="48" alt="image" src="https://github.com/user-attachments/assets/8e6e9b63-865d-4a44-9a94-f997ac607942" />
 
 **7. Are customers with prior insurance history different?**
 
@@ -207,8 +235,8 @@ SELECT
 FROM claims_clean
 GROUP BY group_type;
 ```
-<img width="447" height="72" alt="image" src="https://github.com/user-attachments/assets/e6b2d252-9f8a-44ac-8d31-a36f6755eb67" />
 
+<img width="447" height="72" alt="image" src="https://github.com/user-attachments/assets/e6b2d252-9f8a-44ac-8d31-a36f6755eb67" />
 
 Comparing average claims, premiums, and complaints: the prior-history group behaves almost identically to everyone else.
 
@@ -271,10 +299,10 @@ SELECT 'Loss-Making %', ROUND(100.0 * SUM(CASE WHEN net_position > 0 THEN 1 ELSE
 UNION ALL
 SELECT 'Share of Claims from Loss-Making %', ROUND(100.0 * SUM(CASE WHEN net_position > 0 THEN total_claim_amount ELSE 0 END) / SUM(total_claim_amount), 2) FROM customer_financials;
 ```
+
 <img width="304" height="184" alt="image" src="https://github.com/user-attachments/assets/28466789-3cf7-4477-981d-cf7b0101d493" />
 
 What we see: total premium, total claims, overall loss ratio. The vast majority of customers are profitable; a small share loses money.
-
 
 **3. How do customers split by risk level?**
 
@@ -295,8 +323,8 @@ FROM customer_financials
 GROUP BY risk_band
 ORDER BY risk_band;
 ```
-<img width="338" height="155" alt="image" src="https://github.com/user-attachments/assets/50f74fd1-c4cf-4eb2-a19b-e8efc95408dd" />
 
+<img width="338" height="155" alt="image" src="https://github.com/user-attachments/assets/50f74fd1-c4cf-4eb2-a19b-e8efc95408dd" />
 
 A tiny Critical band.
 
@@ -312,6 +340,7 @@ FROM customer_financials
 ORDER BY net_position DESC
 LIMIT 20;
 ```
+
 <img width="478" height="320" alt="image" src="https://github.com/user-attachments/assets/51b2e978-3174-4918-bd07-95e67a62d866" />
 
 The pattern is Basic / Personal Auto via Agent; almost none of them complain.
@@ -331,6 +360,7 @@ FROM q
 GROUP BY clv_quartile
 ORDER BY clv_quartile;
 ```
+
 <img width="344" height="128" alt="image" src="https://github.com/user-attachments/assets/0ee3d641-32bd-42ce-80e1-8aab721b87b9" />
 
 ### C. Portfolio Analytics
@@ -346,8 +376,8 @@ SELECT 'renew_offer', renew_offer_type, COUNT(*)
 FROM customer_financials
 GROUP BY renew_offer_type;
 ```
-<img width="579" height="135" alt="image" src="https://github.com/user-attachments/assets/ca8d694c-c968-4d9f-bd07-9b0f0818a67d" />
 
+<img width="579" height="135" alt="image" src="https://github.com/user-attachments/assets/ca8d694c-c968-4d9f-bd07-9b0f0818a67d" />
 
 **2. Are there loss-making segments?**
 
@@ -378,6 +408,7 @@ FROM customer_financials
 GROUP BY sales_channel
 ORDER BY loss_ratio_pct DESC;
 ```
+
 <img width="579" height="135" alt="image" src="https://github.com/user-attachments/assets/09c959ee-6a58-47b9-8681-b97cec78df07" />
 
 **4. Does geography matter?**
@@ -393,8 +424,8 @@ FROM customer_financials
 GROUP BY state
 ORDER BY loss_ratio_pct DESC;
 ```
-<img width="552" height="158" alt="image" src="https://github.com/user-attachments/assets/dfc2fa98-0aba-4872-b53d-f908b0e23ce0" />
 
+<img width="552" height="158" alt="image" src="https://github.com/user-attachments/assets/dfc2fa98-0aba-4872-b53d-f908b0e23ce0" />
 
 ### D. Exceptions
 
@@ -413,8 +444,8 @@ UNION ALL
 SELECT 'Critical (LR>2 + complaints)', COUNT(*), ROUND(SUM(total_claim_amount), 0)
 FROM customer_financials WHERE loss_ratio > 2 AND open_complaints > 0;
 ```
-<img width="358" height="115" alt="image" src="https://github.com/user-attachments/assets/ec75e580-9dd3-40f0-865b-869430f2519c" />
 
+<img width="358" height="115" alt="image" src="https://github.com/user-attachments/assets/ec75e580-9dd3-40f0-865b-869430f2519c" />
 
 **2. Are complaints linked to losing money?**
 
@@ -428,8 +459,8 @@ SELECT
 FROM customer_financials
 GROUP BY grp;
 ```
-<img width="491" height="78" alt="image" src="https://github.com/user-attachments/assets/a6b3d797-86ed-4b74-95b7-16edaed097a0" />
 
+<img width="491" height="78" alt="image" src="https://github.com/user-attachments/assets/a6b3d797-86ed-4b74-95b7-16edaed097a0" />
 
 **3. Which group renews more often: losing or profitable?**
 
@@ -449,8 +480,8 @@ FROM customer_financials
 GROUP BY risk_band
 ORDER BY risk_band;
 ```
-<img width="372" height="154" alt="image" src="https://github.com/user-attachments/assets/246d1b78-33c3-48d2-aa1b-0e7ed3a5c893" />
 
+<img width="372" height="154" alt="image" src="https://github.com/user-attachments/assets/246d1b78-33c3-48d2-aa1b-0e7ed3a5c893" />
 
 Losing customers renew more often than profitable ones.
 
@@ -476,12 +507,10 @@ WHERE (total_premium_paid = 0 AND total_claim_amount > 0)
 ORDER BY exception_type, net_position DESC
 LIMIT 50;
 ```
+
 <img width="929" height="1112" alt="image" src="https://github.com/user-attachments/assets/9dedae29-15c0-4c7a-9321-31f6d605c9e8" />
 
-
 ### E. Summary
-
-
 
 **Final KPIs**
 
@@ -502,6 +531,7 @@ SELECT 'Retention %', ROUND(100.0 * SUM(CASE WHEN response = 'Yes' THEN 1 ELSE 0
 UNION ALL
 SELECT 'Exceptions Flagged', SUM(CASE WHEN (total_premium_paid = 0 AND total_claim_amount > 0) OR loss_ratio > 2 OR total_claim_amount > 2000 OR open_complaints >= 3 THEN 1 ELSE 0 END) FROM customer_financials;
 ```
+
 <img width="314" height="235" alt="image" src="https://github.com/user-attachments/assets/7e72fff3-101d-4f63-bbb6-ca8b2347409e" />
 
 **Action Plan**
@@ -519,6 +549,7 @@ UNION ALL
 SELECT 'Call frequent complainers before they leave', COUNT(*), ROUND(SUM(total_claim_amount), 0)
 FROM customer_financials WHERE open_complaints >= 3;
 ```
+
 <img width="476" height="125" alt="image" src="https://github.com/user-attachments/assets/ee44373a-3527-40b3-9152-ec6ac9cdae8a" />
 
 **Final Findings**
