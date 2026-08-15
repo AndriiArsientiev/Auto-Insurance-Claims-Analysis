@@ -1,4 +1,4 @@
-<img width="372" height="154" alt="image" src="https://github.com/user-attachments/assets/df42b847-8d4a-43f0-89f4-fab3d8f2eedd" /># Auto-Insurance-Claims-Analysis
+# Auto-Insurance-Claims-Analysis
 
 SQL project | Analysis of auto insurance claims
 
