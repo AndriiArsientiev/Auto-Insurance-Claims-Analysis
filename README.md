@@ -52,7 +52,9 @@ FROM insurance_claims
 UNION ALL
 SELECT 'Renew Offer Type - Unique', COUNT(DISTINCT "Renew Offer Type")
 FROM insurance_claims;
+
 ```
+<img width="268" height="228" alt="image" src="https://github.com/user-attachments/assets/ed99676f-cc15-432a-ba00-35f60c32b541" />
 
 **2. Create a cleaned table**
 
@@ -122,6 +124,7 @@ SELECT 'CLV - Min', MIN(clv) FROM claims_clean
 UNION ALL
 SELECT 'CLV - Max', MAX(clv) FROM claims_clean;
 ```
+<img width="240" height="306" alt="image" src="https://github.com/user-attachments/assets/91bf5148-2fcf-44e6-be8a-3358eb76fb13" />
 
 No missing values in premium, claims, or lifetime value. No negative or zero premiums, no negative claims. Premium and claim ranges look reasonable.
 
@@ -176,7 +179,7 @@ UNION ALL
 SELECT 'More than 5 open complaints', COUNT(*) FROM claims_clean WHERE open_complaints > 5;
 ```
 
-A chunk of customers have their last claim dated before their current policy started — a history with a previous insurer.
+A chunk of customers have their last claim dated before their current policy started - history with a previous insurer.
 
 **6. How many customers have zero income?**
 
