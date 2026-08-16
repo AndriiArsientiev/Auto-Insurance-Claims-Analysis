@@ -564,3 +564,6 @@ FROM customer_financials WHERE open_complaints >= 3;
 - Claim amount is the customer's last claim
 - Missing income for 25% of customers
 - Dates in mixed formats
+
+** Source **
+- https://www.kaggle.com/datasets/thebumpkin/auto-insurance-claims-updated-to-2024
